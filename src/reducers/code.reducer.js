@@ -7,6 +7,10 @@ const reducer = (state = defaults, action) => {
 			state = Object.assign({}, state, {code: action.payload});
 			break;
 		}
+		case CodeActions.LANGUAGE_SET: {
+			state = Object.assign({}, state, {language: action.payload});
+			break;
+		}
 	}
 
 	return state;
@@ -18,7 +22,8 @@ const defaults = {
 		fontSize: '17px',
 		backgroundColor: 'black',
 		color: '#00DD00'
-	}
+	},
+	language: 'c++'
 }
 
 export default reducer;

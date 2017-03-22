@@ -15,11 +15,26 @@ export default class Code extends React.Component {
 	constructor(props)
 	{
 		super(props);
+
+		this.initPaths();
+	}
+
+	initPaths() {
+		this.folderPath = '';
+
+		this.codeFiles = [];
+		this.codeFiles['c++'] = 'cpp-code.cpp';
+		this.codeFiles['java'] = 'Main.java';
+
+		this.batchFiles = [];
+		this.batchFiles['c++'] = 'cpp-batch.bat';
+		this.batchFiles['java'] = 'java-batch.bat';
 	}
 
 	writeCodeToFile() {
+
 		return new Promise((resolve, reject) => {
-			fs.writeFile('batches/cpp-code.cpp', this.props.code.code, (err, data) => {
+			fs.writeFile(this.folderPath + this.codeFiles[this.props.code.language], this.props.code.code, (err, data) => {
 				if(err)
 					reject(err);
 				else
@@ -29,12 +44,13 @@ export default class Code extends React.Component {
 	}
 
 	executeBatchFile() {
-		var options = {
-			cwd: 'batches/'
-		}
+
+		let options = {
+			cwd: this.folderPath
+		};
 		
 		return new Promise((resolve, reject) => {
-			exec('cpp.bat', options, (error, stdout, stderr) => {
+			exec(this.batchFiles[this.props.code.language], options, (error, stdout, stderr) => {
 				if(error){
 					reject(stderr);
 				}
@@ -46,7 +62,7 @@ export default class Code extends React.Component {
 
 	readOutputFile() {
 		return new Promise((resolve,reject) => {
-			fs.readFile('batches/output.txt', 'utf-8', (err, data) => {
+			fs.readFile(this.folderPath + 'output.txt', 'utf-8', (err, data) => {
 				if(err)
 					reject(err);
 				else
@@ -57,7 +73,7 @@ export default class Code extends React.Component {
 
 	writeInputToFile() {
 		return new Promise((resolve, reject) => {
-			fs.writeFile('batches/input.txt', this.props.codeInput.input, (err, data) => {
+			fs.writeFile(this.folderPath + 'input.txt', this.props.codeInput.input, (err, data) => {
 				if(err)
 					reject(err);
 				else
@@ -76,6 +92,8 @@ export default class Code extends React.Component {
 
 		this.compileButton.innerHTML = 'Writing Code';
 		this.compileButton.className = 'btn btn-warning';
+
+		this.folderPath = 'batches/' + this.props.code.language + '/';
 
 		let promiseChain = this.writeCodeToFile()
 		.then((data) => {
@@ -121,7 +139,14 @@ export default class Code extends React.Component {
 		this.props.dispatch({
 			type: CodeActions.CODE_SET,
 			payload: e.target.value
-		})
+		});
+	}
+
+	updateCodeLanguage(e) {
+		this.props.dispatch({
+			type: CodeActions.LANGUAGE_SET,
+			payload: e.target.value
+		});
 	}
 
 	toggleStdIn(e) {
@@ -155,8 +180,8 @@ export default class Code extends React.Component {
 	}
 
 	terminateProcess() {
-		var options = {
-			cwd: 'batches/'
+		let options = {
+			cwd: this.folderPath
 		}
 
 		exec('terminate.bat', options, (error, stdout, stderr) => {
@@ -187,6 +212,10 @@ export default class Code extends React.Component {
 					<button style={{marginLeft: '20px'}} className="btn btn-danger" onClick={this.terminateProcess.bind(this)}>
 						Terminate Process
 					</button>
+					<select style={{marginLeft: '20px', color: 'black', height: '32px', width: '60px'}} onChange={ this.updateCodeLanguage.bind(this) }>
+						<option value="c++">C++</option>
+						<option value="java">Java</option>
+					</select>
 				</div>
 			</div>
 		);

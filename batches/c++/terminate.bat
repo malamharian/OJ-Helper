@@ -1,0 +1,1 @@
+taskkill /im cpp.exe /f
