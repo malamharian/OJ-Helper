@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Online Judge Tool</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <style>
+      @font-face {
+        font-family: 'UbuntuMono';
+        src: url('fonts/UbuntuMono-R.ttf');
+      }
+      body {
+        font-family: 'UbuntuMono';
+      }
+    </style>
+  </head>
+  <body style="background-color: #414347;color: white;">
+    <div id="app"></div>
+  </body>
+  <script src="http://localhost:8080/webpack-dev-server.js">
+  </script>
+  <script src="http://localhost:8080/built/bundle.js">
+  </script>
+  <script>
+    require('./renderer.js')
+  </script>
+</html>
