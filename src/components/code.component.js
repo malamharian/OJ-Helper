@@ -1,7 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import CodeMirror from 'react-codemirror';
 
 import CodeActions from '../actions/code.actions';
+require('codemirror/mode/clike/clike');
 
 @connect(store => {
 	return {
@@ -16,7 +18,28 @@ export default class Code extends React.Component {
 	{
 		super(props);
 
+		this.state = {};
+
 		this.initPaths();
+		this.initCodeMirror();
+	}
+
+	initCodeMirror() {
+		this.modes = [];
+		this.modes['c++'] = 'text/x-c++src';
+		this.modes['java'] = 'text/x-java';
+
+		this.state.codeMirrorOptions = {
+			lineNumbers: true,
+			theme: 'monokai',
+			mode: this.modes[this.props.code.language],
+			extraKeys: {
+				"Ctrl-Enter": this.compileAndRun.bind(this)
+			},
+			autofocus: true,
+			lineWrapping: true,
+			indentWithTabs: true
+		};
 	}
 
 	initPaths() {
@@ -138,7 +161,7 @@ export default class Code extends React.Component {
 	updateInputCode(e) {
 		this.props.dispatch({
 			type: CodeActions.CODE_SET,
-			payload: e.target.value
+			payload: e
 		});
 	}
 
@@ -147,6 +170,8 @@ export default class Code extends React.Component {
 			type: CodeActions.LANGUAGE_SET,
 			payload: e.target.value
 		});
+
+		this.state.codeMirrorOptions.mode = this.modes[e.target.value];
 	}
 
 	toggleStdIn(e) {
@@ -159,25 +184,6 @@ export default class Code extends React.Component {
 	btnStyle = {
 		width: '150px'
 	};
-
-	handleKeyDown(e) {
-		if(e.keyCode === 9)
-		{
-			var DOMNode = e.target;
-			var start = DOMNode.selectionStart;
-			var end = DOMNode.selectionEnd;
-			
-			var value = DOMNode.value;
-			DOMNode.value = value.substring(0, start) + '\t' + value.substring(end);
-			DOMNode.selectionStart = DOMNode.selectionEnd = start + 1;
-
-			e.preventDefault();
-		}
-		else if(e.keyCode == 13 && e.ctrlKey)
-		{
-			this.compileAndRun();
-		}
-	}
 
 	terminateProcess() {
 		let options = {
@@ -201,8 +207,7 @@ export default class Code extends React.Component {
 				<div class="page-header">
 					<h3>Your Code</h3>
 				</div>
-				<textarea style={ this.props.code.style } className="form-control" rows="15" value={ this.props.code.code } onChange={ this.updateInputCode.bind(this)} onKeyDown={this.handleKeyDown.bind(this) }>
-				</textarea>
+				<CodeMirror ref="editor" options={this.state.codeMirrorOptions} onChange={this.updateInputCode.bind(this)} />
 				<div style={{marginTop: '15px'}}>
 					<button style={ this.btnStyle } ref={(btn) => {
 						this.compileButton = btn;
